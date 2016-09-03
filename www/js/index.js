@@ -1,37 +1,14 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+/* Copyright (c) 2016 asteriskman. All rights reserved.
  */
 var app = {
+    canvas: undefined,
     ctx: undefined,
-    img: undefined,
-    audio: undefined,
     // Application Constructor
     initialize: function() {
-      var canvas = document.getElementById('canvas_main');
-      app.ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      app.canvas = document.getElementById('canvas_main');
+      app.ctx = app.canvas.getContext('2d');
       this.bindEvents();
-      app.img = new Image();
-      app.img.src = 'img/ufo.png';
-      app.audio = new Audio('beep.wav');
 
-      app.resizeCanvas();
     },
     // Bind Event Listeners
     //
@@ -41,9 +18,8 @@ var app = {
         document.addEventListener('deviceready', this.onDeviceReady, false);
         window.addEventListener('resize', this.resizeCanvas, false);
         document.body.addEventListener('touchstart', function(e){ e.preventDefault();}); //to prevent scrolling on mobile
-        document.getElementById('canvas_main').addEventListener('mousedown', app.doMouseDown, false);
-        document.getElementById('canvas_main').addEventListener('touchstart', app.doTouchStart, false);
-
+        app.canvas.addEventListener('mousedown', app.doMouseDown, false);
+        app.canvas.addEventListener('touchstart', app.doTouchStart, false);
     },
     doMouseDown: function(e) {
       canvas_x = e.pageX;
@@ -60,22 +36,20 @@ var app = {
     },
     doPointAction: function(x, y) {
       console.log('dpa: ' + x + ',' + y);
-      app.ctx.drawImage(app.img, x, y);
-      app.audio.currentTime = 0;
-      app.audio.play();
+      //app.ctx.drawImage(app.img, x, y);
+      //app.audio.currentTime = 0;
+      //app.audio.play();
     },
     resizeCanvas: function() {
-      var canvas = document.getElementById('canvas_main');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      console.log("RESIZE");
+      app.canvas.width = window.innerWidth;
+      app.canvas.height = window.innerHeight;
 
       app.ctx.fillStyle = "#FF0000";
-      app.ctx.fillRect(20,20,canvas.width-40,canvas.height-40);
+      app.ctx.fillRect(20,20,app.canvas.width-40,app.canvas.height-40);
       app.ctx.font = "30px Arial";
       app.ctx.fillStyle = "#000000";
-      app.ctx.fillText(canvas.width + ' x ' + canvas.height, 50, 50);
-      app.ctx.drawImage(app.img, 0, 0);
+      app.ctx.fillText(app.canvas.width + ' x ' + app.canvas.height, 50, 50);
+      //app.ctx.drawImage(app.img, 0, 0);
 
     },
     // deviceready Event Handler
@@ -83,7 +57,8 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        app.receivedEvent('deviceready');
+      //app.receivedEvent('deviceready');
+      app.resizeCanvas();
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
