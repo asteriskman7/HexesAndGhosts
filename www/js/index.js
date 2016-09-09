@@ -1,14 +1,28 @@
-/* Copyright (c) 2016 asteriskman. All rights reserved.
- */
+'use strict';
+
+/* Copyright (c) 2016 asteriskman. All rights reserved. */
 var app = {
     canvas: undefined,
     ctx: undefined,
+    scene: undefined,    
+    deviceReady: false,
+    musicEnabled: true,
+    sfxEnabled: true,
     // Application Constructor
     initialize: function() {
       app.canvas = document.getElementById('canvas_main');
       app.ctx = app.canvas.getContext('2d');
+      app.resizeCanvas();
+      images.loadImage('./img/logo.png', [new sprite('logo')]);
+      images.loadImage('./img/button_play.png', [new sprite('button_play')]);
+      images.loadImage('./img/background.jpg', [new sprite('background')]);
+      images.loadImage('./img/sfx.png', [new sprite('sfx')]);
+      images.loadImage('./img/music.png', [new sprite('music')]);      
+      
+      sounds.loadSound('./audio/bgmusic.ogg', 'bgmusic');
+      sounds.loadSound('./audio/beep.wav', 'beep');
+      app.changeScene('loading');
       this.bindEvents();
-
     },
     // Bind Event Listeners
     //
@@ -22,45 +36,43 @@ var app = {
         app.canvas.addEventListener('touchstart', app.doTouchStart, false);
     },
     doMouseDown: function(e) {
-      canvas_x = e.pageX;
-      canvas_y = e.pageY;
-      app.ctx.fillText(canvas_x + ' , ' + canvas_y, 100, 100);
+      var canvas_x = e.pageX;
+      var canvas_y = e.pageY;      
       app.doPointAction(canvas_x, canvas_y);
     },
     doTouchStart: function(e) {
       e.preventDefault();
-      canvas_x = Math.round(e.targetTouches[0].pageX);
-      canvas_y = Math.round(e.targetTouches[0].pageY);
-      app.ctx.fillText(canvas_x + ' , ' + canvas_y, 100, 100);
+      var canvas_x = Math.round(e.targetTouches[0].pageX);
+      var canvas_y = Math.round(e.targetTouches[0].pageY);      
       app.doPointAction(canvas_x, canvas_y);
     },
     doPointAction: function(x, y) {
-      console.log('dpa: ' + x + ',' + y);
-      //app.ctx.drawImage(app.img, x, y);
-      //app.audio.currentTime = 0;
-      //app.audio.play();
+      //console.log('dpa: ' + x + ',' + y);
+      app.scene.doPointAction(x, y);
     },
     resizeCanvas: function() {
       app.canvas.width = window.innerWidth;
       app.canvas.height = window.innerHeight;
-
-      app.ctx.fillStyle = "#FF0000";
-      app.ctx.fillRect(20,20,app.canvas.width-40,app.canvas.height-40);
-      app.ctx.font = "30px Arial";
-      app.ctx.fillStyle = "#000000";
-      app.ctx.fillText(app.canvas.width + ' x ' + app.canvas.height, 50, 50);
-      //app.ctx.drawImage(app.img, 0, 0);
-
+      app.ctx.width = app.canvas.width;
+      app.ctx.height = app.canvas.height;
     },
-    // deviceready Event Handler
-    //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
+      console.log('device ready');
       //app.receivedEvent('deviceready');
+      app.deviceReady = true;
+      //navigator.splashscreen.hide();
+      app.loadState();
       app.resizeCanvas();
+
+      app.loop();
     },
-    // Update DOM on a Received Event
+    initState: function() {
+    },
+    loadState: function() {
+      app.initState();
+    },
+    saveState: function() {
+    },
     receivedEvent: function(id) {
         var parentElement = document.getElementById(id);
         //var listeningElement = parentElement.querySelector('.listening');
@@ -70,5 +82,33 @@ var app = {
         //receivedElement.setAttribute('style', 'display:block;');
 
         console.log('Received Event: ' + id);
+    },
+    changeScene: function(name) {
+      console.log('change scene to ' + name);
+      if (app.scene !== undefined) {
+        app.scene.save();
+      }
+      app.scene = scenes[name];
+      app.scene.load(app.ctx);
+    },
+    loop: function(t) {
+      var nextScene = app.scene.update(t);
+      app.scene.render(t);
+      app.scene.cleanup(t);
+      if (nextScene !== undefined) {
+        app.changeScene(nextScene);
+      }
+      window.requestAnimationFrame(app.loop);
+    },
+    toggleMusic: function() {
+      app.musicEnabled = !app.musicEnabled;
+      if (app.musicEnabled) {
+        sounds.soundList['bgmusic'].play();
+      } else {
+        sounds.soundList['bgmusic'].pause();
+      }
+    },
+    toggleSfx: function() {
+      app.sfxEnabled = !app.sfxEnabled;
     }
 };
